@@ -35,6 +35,12 @@
     -webkit-text-fill-color: transparent;
   }
 
+  #header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
   #stats {
     font-size: 0.85rem;
     color: #8b949e;
@@ -43,6 +49,28 @@
   #stats span {
     color: #58a6ff;
     font-weight: 600;
+  }
+
+  .header-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+    background: #161b22;
+    color: #8b949e;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .header-btn:hover {
+    border-color: #58a6ff;
+    color: #58a6ff;
+  }
+
+  .header-btn.active {
+    border-color: #58a6ff;
+    color: #58a6ff;
+    background: rgba(88, 166, 255, 0.1);
   }
 
   #main {
@@ -226,7 +254,7 @@
     font-size: 0.85rem !important;
   }
 
-  /* Clear button */
+  /* Bottom buttons */
   #clear-btn {
     position: fixed;
     bottom: 20px;
@@ -247,22 +275,6 @@
     color: #f85149;
   }
 
-  /* Tooltip */
-  #tooltip {
-    display: none;
-    position: fixed;
-    padding: 6px 12px;
-    border-radius: 8px;
-    background: #1c2333;
-    border: 1px solid #30363d;
-    font-size: 0.78rem;
-    color: #8b949e;
-    pointer-events: none;
-    z-index: 200;
-    max-width: 250px;
-  }
-
-  /* Reset button */
   #reset-btn {
     position: fixed;
     bottom: 20px;
@@ -283,11 +295,325 @@
     color: #f85149;
   }
 
+  /* Tooltip */
+  #tooltip {
+    display: none;
+    position: fixed;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #1c2333;
+    border: 1px solid #30363d;
+    font-size: 0.78rem;
+    color: #8b949e;
+    pointer-events: none;
+    z-index: 200;
+    max-width: 250px;
+  }
+
+  /* ========== OVERLAY PANELS ========== */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 500;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .overlay.open {
+    display: flex;
+  }
+
+  .panel {
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 750px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: panel-in 0.25s ease-out;
+  }
+
+  @keyframes panel-in {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #21262d;
+  }
+
+  .panel-header h2 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #e0e0e0;
+  }
+
+  .panel-close {
+    background: none;
+    border: none;
+    color: #8b949e;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.15s;
+  }
+
+  .panel-close:hover {
+    background: #161b22;
+    color: #f85149;
+  }
+
+  .panel-search {
+    padding: 12px 20px;
+    border-bottom: 1px solid #21262d;
+  }
+
+  .panel-search input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+    background: #161b22;
+    color: #e0e0e0;
+    font-size: 0.85rem;
+    outline: none;
+  }
+
+  .panel-search input:focus {
+    border-color: #58a6ff;
+  }
+
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+  }
+
+  .panel-body::-webkit-scrollbar { width: 6px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+  .panel-body::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+  /* ===== Combinations Log ===== */
+  .combo-log-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    border-radius: 10px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    font-size: 0.85rem;
+    transition: border-color 0.15s;
+  }
+
+  .combo-log-item:hover {
+    border-color: #30363d;
+  }
+
+  .combo-part {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 14px;
+    background: #1c2333;
+    border: 1px solid #30363d;
+    font-size: 0.8rem;
+  }
+
+  .combo-plus {
+    color: #8b949e;
+    font-weight: 600;
+  }
+
+  .combo-arrow {
+    color: #58a6ff;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .combo-result {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 14px;
+    background: rgba(88, 166, 255, 0.1);
+    border: 1px solid rgba(88, 166, 255, 0.3);
+    font-size: 0.8rem;
+    color: #58a6ff;
+    font-weight: 600;
+  }
+
+  .combo-log-empty {
+    text-align: center;
+    color: #8b949e;
+    padding: 40px 20px;
+    font-size: 0.9rem;
+  }
+
+  /* ===== Dictionary ===== */
+  .dict-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #21262d;
+    flex-wrap: wrap;
+  }
+
+  .dict-tab {
+    padding: 5px 12px;
+    border-radius: 14px;
+    border: 1px solid #30363d;
+    background: #161b22;
+    color: #8b949e;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .dict-tab:hover {
+    border-color: #58a6ff;
+    color: #58a6ff;
+  }
+
+  .dict-tab.active {
+    border-color: #58a6ff;
+    background: rgba(88, 166, 255, 0.1);
+    color: #58a6ff;
+  }
+
+  .dict-card {
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    transition: border-color 0.15s;
+    cursor: pointer;
+  }
+
+  .dict-card:hover {
+    border-color: #30363d;
+  }
+
+  .dict-card.expanded {
+    border-color: #58a6ff;
+  }
+
+  .dict-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dict-emoji {
+    font-size: 1.5rem;
+    width: 36px;
+    text-align: center;
+  }
+
+  .dict-info {
+    flex: 1;
+  }
+
+  .dict-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .dict-cat {
+    font-size: 0.72rem;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 1px;
+  }
+
+  .dict-desc {
+    font-size: 0.82rem;
+    color: #8b949e;
+    margin-top: 2px;
+  }
+
+  .dict-badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(88, 166, 255, 0.1);
+    color: #58a6ff;
+    border: 1px solid rgba(88, 166, 255, 0.2);
+  }
+
+  .dict-badge.locked {
+    background: rgba(139, 148, 158, 0.1);
+    color: #8b949e;
+    border-color: rgba(139, 148, 158, 0.2);
+  }
+
+  .dict-detail {
+    display: none;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #21262d;
+  }
+
+  .dict-card.expanded .dict-detail {
+    display: block;
+  }
+
+  .dict-detail h4 {
+    font-size: 0.78rem;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .dict-recipe-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0;
+    font-size: 0.82rem;
+  }
+
+  .dict-recipe-row .combo-part {
+    font-size: 0.75rem;
+  }
+
+  .dict-makes-label {
+    margin-top: 12px;
+  }
+
+  .cat-chemistry { color: #79c0ff; }
+  .cat-physics { color: #d2a8ff; }
+  .cat-biology { color: #7ee787; }
+  .cat-earth { color: #d29922; }
+  .cat-space { color: #f778ba; }
+  .cat-tech { color: #ff7b72; }
+  .cat-fundamental { color: #ffa657; }
+
   /* Mobile */
   @media (max-width: 640px) {
     #sidebar { width: 100%; min-width: 100%; max-height: 35vh; border-right: none; border-bottom: 1px solid #21262d; }
     #main { flex-direction: column; }
     #canvas { min-height: 65vh; }
+    .panel { width: 96%; max-height: 90vh; }
+    #header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+    #header-right { gap: 8px; }
   }
 </style>
 </head>
@@ -295,7 +621,11 @@
 
 <div id="header">
   <h1>⚗️ Science Craft</h1>
-  <div id="stats">Discovered: <span id="count">4</span> / <span id="total">???</span></div>
+  <div id="header-right">
+    <div id="stats">Discovered: <span id="count">4</span> / <span id="total">???</span></div>
+    <button class="header-btn" onclick="togglePanel('combos')">📋 Combinations</button>
+    <button class="header-btn" onclick="togglePanel('dict')">📖 Dictionary</button>
+  </div>
 </div>
 
 <div id="main">
@@ -314,19 +644,52 @@
 <button id="reset-btn" onclick="resetGame()">🔄 Reset All</button>
 <div id="tooltip"></div>
 
+<!-- ===== COMBINATIONS PANEL ===== -->
+<div class="overlay" id="combos-overlay" onclick="closePanelOutside(event, 'combos')">
+  <div class="panel">
+    <div class="panel-header">
+      <h2>📋 Discovered Combinations</h2>
+      <button class="panel-close" onclick="togglePanel('combos')">✕</button>
+    </div>
+    <div class="panel-search">
+      <input type="text" id="combo-search" placeholder="🔍 Search combinations..." oninput="renderCombos()">
+    </div>
+    <div class="panel-body" id="combos-body"></div>
+  </div>
+</div>
+
+<!-- ===== DICTIONARY PANEL ===== -->
+<div class="overlay" id="dict-overlay" onclick="closePanelOutside(event, 'dict')">
+  <div class="panel">
+    <div class="panel-header">
+      <h2>📖 Science Dictionary</h2>
+      <button class="panel-close" onclick="togglePanel('dict')">✕</button>
+    </div>
+    <div class="dict-tabs" id="dict-tabs">
+      <button class="dict-tab active" data-cat="all" onclick="setDictTab('all')">All</button>
+      <button class="dict-tab" data-cat="fundamental" onclick="setDictTab('fundamental')">⚛️ Fundamental</button>
+      <button class="dict-tab" data-cat="chemistry" onclick="setDictTab('chemistry')">🧪 Chemistry</button>
+      <button class="dict-tab" data-cat="physics" onclick="setDictTab('physics')">⚡ Physics</button>
+      <button class="dict-tab" data-cat="biology" onclick="setDictTab('biology')">🧬 Biology</button>
+      <button class="dict-tab" data-cat="earth" onclick="setDictTab('earth')">🌍 Earth</button>
+      <button class="dict-tab" data-cat="space" onclick="setDictTab('space')">🌌 Space</button>
+      <button class="dict-tab" data-cat="tech" onclick="setDictTab('tech')">💻 Tech</button>
+    </div>
+    <div class="panel-search">
+      <input type="text" id="dict-search" placeholder="🔍 Search dictionary..." oninput="renderDict()">
+    </div>
+    <div class="panel-body" id="dict-body"></div>
+  </div>
+</div>
+
 <script>
 // ========== SCIENCE CRAFT ENGINE ==========
 
-// All recipes: [a, b] → result
-// Categories: fundamental, chemistry, physics, biology, earth, space, tech
 const ELEMENTS = {
-  // ---- BASE (4 starters) ----
   "Atom":       { emoji: "⚛️", cat: "fundamental", desc: "The building block of all matter" },
   "Energy":     { emoji: "⚡", cat: "physics",      desc: "The capacity to do work" },
   "Water":      { emoji: "💧", cat: "chemistry",    desc: "H₂O — the universal solvent" },
   "Earth":      { emoji: "🪨", cat: "earth",        desc: "Solid ground, rocks and minerals" },
-
-  // ---- TIER 1 ----
   "Molecule":   { emoji: "🔬", cat: "chemistry",    desc: "Two or more atoms bonded together" },
   "Heat":       { emoji: "🔥", cat: "physics",      desc: "Thermal energy in motion" },
   "Pressure":   { emoji: "🫸", cat: "physics",      desc: "Force per unit area" },
@@ -335,8 +698,6 @@ const ELEMENTS = {
   "Mud":        { emoji: "🟤", cat: "earth",        desc: "Wet earth, a slurry of minerals" },
   "Wave":       { emoji: "🌊", cat: "physics",      desc: "A disturbance transferring energy" },
   "Ion":        { emoji: "🔋", cat: "chemistry",    desc: "An atom with net electric charge" },
-
-  // ---- TIER 2 ----
   "Cell":       { emoji: "🧫", cat: "biology",      desc: "The basic unit of life" },
   "Metal":      { emoji: "🔩", cat: "chemistry",    desc: "Conductive, malleable element" },
   "Crystal":    { emoji: "✨", cat: "earth",        desc: "Ordered atomic lattice structure" },
@@ -349,8 +710,6 @@ const ELEMENTS = {
   "Erosion":    { emoji: "🏜️", cat: "earth",        desc: "Gradual wearing away by water and wind" },
   "Solution":   { emoji: "🫗", cat: "chemistry",    desc: "Homogeneous mixture of solute in solvent" },
   "Plasma":     { emoji: "🟣", cat: "physics",      desc: "Ionized gas — the fourth state of matter" },
-
-  // ---- TIER 3 ----
   "Bacteria":   { emoji: "🦠", cat: "biology",      desc: "Single-celled prokaryotic organism" },
   "Virus":      { emoji: "🧬", cat: "biology",      desc: "Infectious agent requiring a host cell" },
   "DNA":        { emoji: "🧬", cat: "biology",      desc: "Double helix carrying genetic code" },
@@ -367,8 +726,6 @@ const ELEMENTS = {
   "Radiation":  { emoji: "☢️", cat: "physics",      desc: "Emission of energy as waves or particles" },
   "Earthquake": { emoji: "📳", cat: "earth",        desc: "Sudden release of energy in the crust" },
   "Cloud":      { emoji: "☁️", cat: "earth",        desc: "Visible mass of water droplets in the atmosphere" },
-
-  // ---- TIER 4 ----
   "Evolution":  { emoji: "🐒", cat: "biology",      desc: "Change in heritable traits over generations" },
   "Genome":     { emoji: "📖", cat: "biology",      desc: "Complete set of genetic instructions" },
   "Telescope":  { emoji: "🔭", cat: "physics",      desc: "Optical instrument for observing distant objects" },
@@ -387,8 +744,6 @@ const ELEMENTS = {
   "Photon":     { emoji: "✴️", cat: "physics",      desc: "Quantum of electromagnetic radiation" },
   "Star":       { emoji: "⭐", cat: "space",        desc: "Luminous sphere of plasma held by gravity" },
   "Catalyst":   { emoji: "⏩", cat: "chemistry",    desc: "Speeds up reaction without being consumed" },
-
-  // ---- TIER 5 ----
   "Black Hole": { emoji: "🕳️", cat: "space",       desc: "Spacetime region where gravity prevents escape" },
   "Supernova":  { emoji: "💫", cat: "space",        desc: "Explosive death of a massive star" },
   "Neutron Star": { emoji: "🌑", cat: "space",      desc: "Ultra-dense remnant of a supernova" },
@@ -425,7 +780,6 @@ const ELEMENTS = {
 };
 
 const RECIPES = [
-  // Tier 1
   ["Atom", "Atom", "Molecule"],
   ["Energy", "Atom", "Ion"],
   ["Energy", "Energy", "Heat"],
@@ -434,8 +788,6 @@ const RECIPES = [
   ["Water", "Earth", "Mud"],
   ["Water", "Heat", "Steam"],
   ["Earth", "Pressure", "Mineral"],
-
-  // Tier 2
   ["Molecule", "Water", "Cell"],
   ["Molecule", "Molecule", "Polymer"],
   ["Mineral", "Heat", "Metal"],
@@ -451,8 +803,6 @@ const RECIPES = [
   ["Ion", "Heat", "Plasma"],
   ["Water", "Mud", "Solution"],
   ["Heat", "Atom", "Plasma"],
-
-  // Tier 3
   ["Cell", "Cell", "Bacteria"],
   ["Cell", "Molecule", "Virus"],
   ["Cell", "Acid", "DNA"],
@@ -473,8 +823,6 @@ const RECIPES = [
   ["Steam", "Gas", "Cloud"],
   ["Water", "Gas", "Cloud"],
   ["Molecule", "Energy", "Catalyst"],
-
-  // Tier 4
   ["DNA", "DNA", "Genome"],
   ["Bacteria", "DNA", "Evolution"],
   ["Cell", "DNA", "Evolution"],
@@ -499,8 +847,6 @@ const RECIPES = [
   ["Light", "Energy", "Photon"],
   ["Plasma", "Nuclear Fusion", "Star"],
   ["Heat", "Plasma", "Star"],
-
-  // Tier 5
   ["Star", "Pressure", "Black Hole"],
   ["Star", "Star", "Supernova"],
   ["Star", "Energy", "Supernova"],
@@ -570,11 +916,12 @@ const RECIPES = [
 // ========== GAME STATE ==========
 const BASE_ELEMENTS = ["Atom", "Energy", "Water", "Earth"];
 let discovered = new Set(BASE_ELEMENTS);
-let canvasChips = [];
+let discoveredCombos = []; // [{a, b, result, timestamp}]
 let chipIdCounter = 0;
 let dragState = null;
+let currentDictTab = 'all';
 
-// Load saved state
+// ========== PERSISTENCE ==========
 function loadState() {
   try {
     const saved = localStorage.getItem('scicraft_discovered');
@@ -582,11 +929,16 @@ function loadState() {
       const arr = JSON.parse(saved);
       discovered = new Set([...BASE_ELEMENTS, ...arr.filter(n => ELEMENTS[n])]);
     }
+    const savedCombos = localStorage.getItem('scicraft_combos');
+    if (savedCombos) {
+      discoveredCombos = JSON.parse(savedCombos);
+    }
   } catch(e) {}
 }
 
 function saveState() {
   localStorage.setItem('scicraft_discovered', JSON.stringify([...discovered]));
+  localStorage.setItem('scicraft_combos', JSON.stringify(discoveredCombos));
 }
 
 // ========== RECIPE LOOKUP ==========
@@ -598,6 +950,17 @@ RECIPES.forEach(([a, b, result]) => {
 
 function combine(a, b) {
   return recipeMap.get(`${a}|${b}`) || null;
+}
+
+// Build reverse lookup: for each element, what recipes produce it, and what can it make
+function getRecipesFor(name) {
+  const madeBy = [];
+  const makes = [];
+  RECIPES.forEach(([a, b, result]) => {
+    if (result === name) madeBy.push([a, b]);
+    if (a === name || b === name) makes.push([a, b, result]);
+  });
+  return { madeBy, makes };
 }
 
 // ========== SIDEBAR ==========
@@ -618,7 +981,6 @@ function renderSidebar(filter = '') {
 
   document.getElementById('count').textContent = discovered.size;
 
-  // Drag from sidebar
   list.querySelectorAll('.sidebar-item').forEach(item => {
     item.addEventListener('mousedown', (e) => sidebarDragStart(e, item.dataset.name));
     item.addEventListener('touchstart', (e) => sidebarDragStart(e, item.dataset.name), { passive: false });
@@ -665,13 +1027,7 @@ function sidebarDragStart(e, name) {
   const chip = createChipOnCanvas(name, pos.x - rect.left - 40, pos.y - rect.top - 16);
   if (!chip) return;
 
-  dragState = {
-    chip,
-    offsetX: 40,
-    offsetY: 16,
-    canvasRect: rect,
-    fromSidebar: true
-  };
+  dragState = { chip, offsetX: 40, offsetY: 16, canvasRect: rect, fromSidebar: true };
 }
 
 function chipDragStart(e, chip) {
@@ -689,7 +1045,6 @@ function chipDragStart(e, chip) {
     canvasRect: rect,
     fromSidebar: false
   };
-
   chip.style.zIndex = 50;
 }
 
@@ -707,14 +1062,12 @@ function onEnd(e) {
   const { chip } = dragState;
   chip.style.zIndex = 5;
 
-  // Check overlap with other chips
   const chipRect = chip.getBoundingClientRect();
   const allChips = document.querySelectorAll('.element-chip');
 
   for (const other of allChips) {
     if (other === chip) continue;
     const otherRect = other.getBoundingClientRect();
-
     if (rectsOverlap(chipRect, otherRect)) {
       attemptMerge(chip, other);
       break;
@@ -734,25 +1087,37 @@ function attemptMerge(chipA, chipB) {
   const result = combine(nameA, nameB);
 
   if (!result) {
-    // No recipe — bounce back
     showComboText(chipA, "❌ No reaction", false);
     return;
   }
 
   const isNew = !discovered.has(result);
   discovered.add(result);
+
+  // Log combination
+  const comboKey = [nameA, nameB].sort().join('|') + '→' + result;
+  const alreadyLogged = discoveredCombos.some(c =>
+    [c.a, c.b].sort().join('|') + '→' + c.result === comboKey
+  );
+  if (!alreadyLogged) {
+    discoveredCombos.push({
+      a: nameA,
+      b: nameB,
+      result,
+      timestamp: Date.now(),
+      isFirst: isNew
+    });
+  }
+
   saveState();
 
-  // Position result between the two
   const ax = parseFloat(chipA.style.left), ay = parseFloat(chipA.style.top);
   const bx = parseFloat(chipB.style.left), by = parseFloat(chipB.style.top);
   const rx = (ax + bx) / 2, ry = (ay + by) / 2;
 
-  // Remove originals
   chipA.remove();
   chipB.remove();
 
-  // Create result
   const resultChip = createChipOnCanvas(result, rx, ry, true);
 
   const el = ELEMENTS[result];
@@ -775,6 +1140,142 @@ function showComboText(chip, text, isFirst) {
   setTimeout(() => div.remove(), 1300);
 }
 
+// ========== PANELS ==========
+function togglePanel(name) {
+  const overlay = document.getElementById(name + '-overlay');
+  const isOpen = overlay.classList.contains('open');
+
+  // Close all
+  document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
+  document.querySelectorAll('.header-btn').forEach(b => b.classList.remove('active'));
+
+  if (!isOpen) {
+    overlay.classList.add('open');
+    // Highlight button
+    const btns = document.querySelectorAll('.header-btn');
+    if (name === 'combos') btns[0].classList.add('active');
+    if (name === 'dict') btns[1].classList.add('active');
+
+    if (name === 'combos') renderCombos();
+    if (name === 'dict') renderDict();
+  }
+}
+
+function closePanelOutside(e, name) {
+  if (e.target === document.getElementById(name + '-overlay')) {
+    togglePanel(name);
+  }
+}
+
+// ========== COMBINATIONS LOG ==========
+function renderCombos() {
+  const body = document.getElementById('combos-body');
+  const filter = (document.getElementById('combo-search').value || '').toLowerCase();
+
+  const filtered = discoveredCombos.filter(c => {
+    const text = `${c.a} ${c.b} ${c.result}`.toLowerCase();
+    return text.includes(filter);
+  });
+
+  if (filtered.length === 0) {
+    body.innerHTML = `<div class="combo-log-empty">
+      ${discoveredCombos.length === 0
+        ? '🧪 No combinations discovered yet.<br>Drag two elements together to combine them!'
+        : '🔍 No matches found.'}
+    </div>`;
+    return;
+  }
+
+  body.innerHTML = filtered.slice().reverse().map(c => {
+    const elA = ELEMENTS[c.a], elB = ELEMENTS[c.b], elR = ELEMENTS[c.result];
+    return `<div class="combo-log-item">
+      <span class="combo-part">${elA.emoji} ${c.a}</span>
+      <span class="combo-plus">+</span>
+      <span class="combo-part">${elB.emoji} ${c.b}</span>
+      <span class="combo-arrow">→</span>
+      <span class="combo-result">${elR.emoji} ${c.result}</span>
+    </div>`;
+  }).join('');
+}
+
+// ========== DICTIONARY ==========
+function setDictTab(cat) {
+  currentDictTab = cat;
+  document.querySelectorAll('.dict-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === cat);
+  });
+  renderDict();
+}
+
+function renderDict() {
+  const body = document.getElementById('dict-body');
+  const filter = (document.getElementById('dict-search').value || '').toLowerCase();
+
+  const allNames = Object.keys(ELEMENTS).sort((a, b) => a.localeCompare(b));
+
+  const filtered = allNames.filter(name => {
+    const el = ELEMENTS[name];
+    if (currentDictTab !== 'all' && el.cat !== currentDictTab) return false;
+    if (filter && !name.toLowerCase().includes(filter) && !el.desc.toLowerCase().includes(filter)) return false;
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    body.innerHTML = '<div class="combo-log-empty">🔍 No elements found.</div>';
+    return;
+  }
+
+  body.innerHTML = filtered.map(name => {
+    const el = ELEMENTS[name];
+    const isDiscovered = discovered.has(name);
+    const { madeBy, makes } = getRecipesFor(name);
+
+    // Only show discovered recipes
+    const knownMadeBy = madeBy.filter(([a, b]) => discovered.has(a) && discovered.has(b) && discovered.has(name));
+    const knownMakes = makes.filter(([a, b, r]) => discovered.has(a) && discovered.has(b) && discovered.has(r));
+
+    const catClass = 'cat-' + el.cat;
+
+    return `<div class="dict-card" onclick="this.classList.toggle('expanded')">
+      <div class="dict-card-header">
+        <div class="dict-emoji">${isDiscovered ? el.emoji : '❓'}</div>
+        <div class="dict-info">
+          <div class="dict-name">${isDiscovered ? name : '???'}</div>
+          <div class="dict-cat ${catClass}">${el.cat}</div>
+          ${isDiscovered ? `<div class="dict-desc">${el.desc}</div>` : ''}
+        </div>
+        <div class="dict-badge ${isDiscovered ? '' : 'locked'}">${isDiscovered ? '✓ Discovered' : '🔒 Locked'}</div>
+      </div>
+      ${isDiscovered ? `<div class="dict-detail">
+        ${knownMadeBy.length > 0 ? `
+          <h4>📥 How to make</h4>
+          ${knownMadeBy.map(([a, b]) => `
+            <div class="dict-recipe-row">
+              <span class="combo-part">${ELEMENTS[a].emoji} ${a}</span>
+              <span class="combo-plus">+</span>
+              <span class="combo-part">${ELEMENTS[b].emoji} ${b}</span>
+            </div>
+          `).join('')}
+        ` : BASE_ELEMENTS.includes(name) ? '<h4>📥 Base element — available from the start</h4>' : '<h4>📥 Recipe not yet discovered</h4>'}
+        ${knownMakes.length > 0 ? `
+          <h4 class="dict-makes-label">📤 Can be used to make</h4>
+          ${knownMakes.map(([a, b, r]) => {
+            const other = a === name ? b : a;
+            return `<div class="dict-recipe-row">
+              <span class="combo-plus">+</span>
+              <span class="combo-part">${ELEMENTS[other].emoji} ${other}</span>
+              <span class="combo-arrow">→</span>
+              <span class="combo-result">${ELEMENTS[r].emoji} ${r}</span>
+            </div>`;
+          }).join('')}
+        ` : ''}
+      </div>` : `<div class="dict-detail">
+        <h4>🔒 Discover this element to see its details</h4>
+      </div>`}
+    </div>`;
+  }).join('');
+}
+
 // ========== CONTROLS ==========
 function clearCanvas() {
   document.querySelectorAll('.element-chip').forEach(c => c.remove());
@@ -782,8 +1283,9 @@ function clearCanvas() {
 }
 
 function resetGame() {
-  if (!confirm('Reset all progress? You will lose all discovered elements.')) return;
+  if (!confirm('Reset all progress? You will lose all discovered elements and combinations.')) return;
   discovered = new Set(BASE_ELEMENTS);
+  discoveredCombos = [];
   saveState();
   clearCanvas();
   renderSidebar();
@@ -791,7 +1293,7 @@ function resetGame() {
 
 // ========== TOOLTIP ==========
 document.addEventListener('mouseover', (e) => {
-  const item = e.target.closest('[data-name]');
+  const item = e.target.closest('.sidebar-item[data-name]');
   if (!item) { document.getElementById('tooltip').style.display = 'none'; return; }
   const name = item.dataset.name;
   const el = ELEMENTS[name];
@@ -804,6 +1306,14 @@ document.addEventListener('mouseover', (e) => {
   tip.style.top = rect.top + 'px';
 });
 
+// ========== KEYBOARD ==========
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
+    document.querySelectorAll('.header-btn').forEach(b => b.classList.remove('active'));
+  }
+});
+
 // ========== INIT ==========
 document.addEventListener('mousemove', onMove);
 document.addEventListener('mouseup', onEnd);
@@ -814,7 +1324,6 @@ document.getElementById('search').addEventListener('input', (e) => {
   renderSidebar(e.target.value);
 });
 
-// Count total possible
 document.getElementById('total').textContent = Object.keys(ELEMENTS).length;
 
 loadState();
