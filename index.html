@@ -984,6 +984,14 @@ function renderSidebar(filter = '') {
   list.querySelectorAll('.sidebar-item').forEach(item => {
     item.addEventListener('mousedown', (e) => sidebarDragStart(e, item.dataset.name));
     item.addEventListener('touchstart', (e) => sidebarDragStart(e, item.dataset.name), { passive: false });
+    item.addEventListener('dblclick', (e) => {
+      e.preventDefault();
+      const canvas = document.getElementById('canvas');
+      const rect = canvas.getBoundingClientRect();
+      const x = 60 + Math.random() * (rect.width - 200);
+      const y = 60 + Math.random() * (rect.height - 100);
+      createChipOnCanvas(item.dataset.name, x, y, true);
+    });
   });
 }
 
@@ -1007,9 +1015,19 @@ function createChipOnCanvas(name, x, y, animate = false) {
 
   chip.addEventListener('mousedown', (e) => chipDragStart(e, chip));
   chip.addEventListener('touchstart', (e) => chipDragStart(e, chip), { passive: false });
+  chip.addEventListener('dblclick', (e) => duplicateChip(e, chip));
 
   document.getElementById('canvas').appendChild(chip);
   return chip;
+}
+
+function duplicateChip(e, chip) {
+  e.preventDefault();
+  e.stopPropagation();
+  const name = chip.dataset.name;
+  const x = parseFloat(chip.style.left) + 20;
+  const y = parseFloat(chip.style.top) + 20;
+  createChipOnCanvas(name, x, y, true);
 }
 
 // ========== DRAG & DROP ==========
