@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science Craft ⚗️</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0a0e1a;
+    color: #e0e0e0;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  #header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #0d1117, #161b22);
+    border-bottom: 1px solid #21262d;
+    z-index: 100;
+    position: relative;
+  }
+
+  #header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #58a6ff, #bc8cff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  #stats {
+    font-size: 0.85rem;
+    color: #8b949e;
+  }
+
+  #stats span {
+    color: #58a6ff;
+    font-weight: 600;
+  }
+
+  #main {
+    display: flex;
+    height: calc(100vh - 52px);
+  }
+
+  /* Sidebar */
+  #sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: #0d1117;
+    border-right: 1px solid #21262d;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+  }
+
+  #search-box {
+    padding: 10px 12px;
+    border-bottom: 1px solid #21262d;
+  }
+
+  #search-box input {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+    background: #161b22;
+    color: #e0e0e0;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #search-box input:focus {
+    border-color: #58a6ff;
+  }
+
+  #element-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+
+  #element-list::-webkit-scrollbar { width: 6px; }
+  #element-list::-webkit-scrollbar-track { background: transparent; }
+  #element-list::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+  .sidebar-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    margin: 3px;
+    border-radius: 20px;
+    background: #161b22;
+    border: 1px solid #21262d;
+    font-size: 0.82rem;
+    cursor: grab;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .sidebar-item:hover {
+    border-color: #58a6ff;
+    background: #1a2233;
+    transform: translateY(-1px);
+  }
+
+  .sidebar-item:active { cursor: grabbing; }
+
+  .sidebar-item .emoji { font-size: 1rem; }
+
+  .new-badge {
+    animation: glow 1.5s ease-in-out;
+  }
+
+  @keyframes glow {
+    0%, 100% { box-shadow: none; }
+    50% { box-shadow: 0 0 12px rgba(88, 166, 255, 0.5); }
+  }
+
+  /* Canvas */
+  #canvas {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 20% 50%, rgba(88, 166, 255, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 50%, rgba(188, 140, 255, 0.03) 0%, transparent 50%),
+      #0a0e1a;
+  }
+
+  #canvas-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, #1a1f2e 1px, transparent 1px);
+    background-size: 30px 30px;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .element-chip {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #161b22, #1c2333);
+    border: 1.5px solid #30363d;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: grab;
+    white-space: nowrap;
+    z-index: 5;
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+
+  .element-chip:hover {
+    border-color: #58a6ff;
+    box-shadow: 0 4px 20px rgba(88, 166, 255, 0.15);
+  }
+
+  .element-chip:active { cursor: grabbing; }
+
+  .element-chip .emoji { font-size: 1.15rem; }
+
+  .element-chip .remove {
+    margin-left: 4px;
+    opacity: 0;
+    font-size: 0.7rem;
+    color: #8b949e;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .element-chip:hover .remove { opacity: 0.7; }
+  .element-chip .remove:hover { opacity: 1; color: #f85149; }
+
+  /* Merge animation */
+  .merging {
+    animation: merge-pulse 0.4s ease-out;
+  }
+
+  @keyframes merge-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); box-shadow: 0 0 30px rgba(88, 166, 255, 0.4); }
+    100% { transform: scale(1); }
+  }
+
+  .result-pop {
+    animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes pop-in {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Combo text */
+  .combo-text {
+    position: absolute;
+    font-size: 0.75rem;
+    color: #58a6ff;
+    font-weight: 600;
+    pointer-events: none;
+    animation: float-up 1.2s ease-out forwards;
+    z-index: 50;
+  }
+
+  @keyframes float-up {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-40px); }
+  }
+
+  .first-discovery {
+    color: #f0c040 !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* Clear button */
+  #clear-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid #30363d;
+    background: #161b22;
+    color: #8b949e;
+    font-size: 0.85rem;
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.2s;
+  }
+
+  #clear-btn:hover {
+    border-color: #f85149;
+    color: #f85149;
+  }
+
+  /* Tooltip */
+  #tooltip {
+    display: none;
+    position: fixed;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #1c2333;
+    border: 1px solid #30363d;
+    font-size: 0.78rem;
+    color: #8b949e;
+    pointer-events: none;
+    z-index: 200;
+    max-width: 250px;
+  }
+
+  /* Reset button */
+  #reset-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 140px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid #30363d;
+    background: #161b22;
+    color: #8b949e;
+    font-size: 0.85rem;
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.2s;
+  }
+
+  #reset-btn:hover {
+    border-color: #f85149;
+    color: #f85149;
+  }
+
+  /* Mobile */
+  @media (max-width: 640px) {
+    #sidebar { width: 100%; min-width: 100%; max-height: 35vh; border-right: none; border-bottom: 1px solid #21262d; }
+    #main { flex-direction: column; }
+    #canvas { min-height: 65vh; }
+  }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>⚗️ Science Craft</h1>
+  <div id="stats">Discovered: <span id="count">4</span> / <span id="total">???</span></div>
+</div>
+
+<div id="main">
+  <div id="sidebar">
+    <div id="search-box">
+      <input type="text" id="search" placeholder="🔍 Search elements...">
+    </div>
+    <div id="element-list"></div>
+  </div>
+  <div id="canvas">
+    <div id="canvas-bg"></div>
+  </div>
+</div>
+
+<button id="clear-btn" onclick="clearCanvas()">🧹 Clear Board</button>
+<button id="reset-btn" onclick="resetGame()">🔄 Reset All</button>
+<div id="tooltip"></div>
+
+<script>
+// ========== SCIENCE CRAFT ENGINE ==========
+
+// All recipes: [a, b] → result
+// Categories: fundamental, chemistry, physics, biology, earth, space, tech
+const ELEMENTS = {
+  // ---- BASE (4 starters) ----
+  "Atom":       { emoji: "⚛️", cat: "fundamental", desc: "The building block of all matter" },
+  "Energy":     { emoji: "⚡", cat: "physics",      desc: "The capacity to do work" },
+  "Water":      { emoji: "💧", cat: "chemistry",    desc: "H₂O — the universal solvent" },
+  "Earth":      { emoji: "🪨", cat: "earth",        desc: "Solid ground, rocks and minerals" },
+
+  // ---- TIER 1 ----
+  "Molecule":   { emoji: "🔬", cat: "chemistry",    desc: "Two or more atoms bonded together" },
+  "Heat":       { emoji: "🔥", cat: "physics",      desc: "Thermal energy in motion" },
+  "Pressure":   { emoji: "🫸", cat: "physics",      desc: "Force per unit area" },
+  "Mineral":    { emoji: "💎", cat: "earth",        desc: "Naturally occurring inorganic solid" },
+  "Steam":      { emoji: "♨️", cat: "chemistry",    desc: "Water in gaseous phase" },
+  "Mud":        { emoji: "🟤", cat: "earth",        desc: "Wet earth, a slurry of minerals" },
+  "Wave":       { emoji: "🌊", cat: "physics",      desc: "A disturbance transferring energy" },
+  "Ion":        { emoji: "🔋", cat: "chemistry",    desc: "An atom with net electric charge" },
+
+  // ---- TIER 2 ----
+  "Cell":       { emoji: "🧫", cat: "biology",      desc: "The basic unit of life" },
+  "Metal":      { emoji: "🔩", cat: "chemistry",    desc: "Conductive, malleable element" },
+  "Crystal":    { emoji: "✨", cat: "earth",        desc: "Ordered atomic lattice structure" },
+  "Gas":        { emoji: "💨", cat: "chemistry",    desc: "Matter with no fixed shape or volume" },
+  "Electricity":{ emoji: "🔌", cat: "physics",      desc: "Flow of electric charge" },
+  "Acid":       { emoji: "🧪", cat: "chemistry",    desc: "Proton donor, pH < 7" },
+  "Magma":      { emoji: "🌋", cat: "earth",        desc: "Molten rock beneath Earth's surface" },
+  "Light":      { emoji: "💡", cat: "physics",      desc: "Electromagnetic radiation visible to eyes" },
+  "Sound":      { emoji: "🔊", cat: "physics",      desc: "Mechanical wave through a medium" },
+  "Erosion":    { emoji: "🏜️", cat: "earth",        desc: "Gradual wearing away by water and wind" },
+  "Solution":   { emoji: "🫗", cat: "chemistry",    desc: "Homogeneous mixture of solute in solvent" },
+  "Plasma":     { emoji: "🟣", cat: "physics",      desc: "Ionized gas — the fourth state of matter" },
+
+  // ---- TIER 3 ----
+  "Bacteria":   { emoji: "🦠", cat: "biology",      desc: "Single-celled prokaryotic organism" },
+  "Virus":      { emoji: "🧬", cat: "biology",      desc: "Infectious agent requiring a host cell" },
+  "DNA":        { emoji: "🧬", cat: "biology",      desc: "Double helix carrying genetic code" },
+  "Photosynthesis": { emoji: "🌿", cat: "biology",  desc: "Light energy → chemical energy in plants" },
+  "Magnet":     { emoji: "🧲", cat: "physics",      desc: "Object producing a magnetic field" },
+  "Alloy":      { emoji: "⚙️", cat: "chemistry",    desc: "Mixture of metals with enhanced properties" },
+  "Volcano":    { emoji: "🌋", cat: "earth",        desc: "Rupture in the crust releasing magma" },
+  "Fossil":     { emoji: "🦴", cat: "earth",        desc: "Preserved remains of ancient organisms" },
+  "Polymer":    { emoji: "🔗", cat: "chemistry",    desc: "Long chain of repeating molecular units" },
+  "Semiconductor": { emoji: "📟", cat: "physics",   desc: "Material with conductivity between metal and insulator" },
+  "Lens":       { emoji: "🔍", cat: "physics",      desc: "Transparent piece that refracts light" },
+  "Enzyme":     { emoji: "🫧", cat: "biology",      desc: "Biological catalyst speeding up reactions" },
+  "Salt":       { emoji: "🧂", cat: "chemistry",    desc: "Ionic compound from acid-base reaction" },
+  "Radiation":  { emoji: "☢️", cat: "physics",      desc: "Emission of energy as waves or particles" },
+  "Earthquake": { emoji: "📳", cat: "earth",        desc: "Sudden release of energy in the crust" },
+  "Cloud":      { emoji: "☁️", cat: "earth",        desc: "Visible mass of water droplets in the atmosphere" },
+
+  // ---- TIER 4 ----
+  "Evolution":  { emoji: "🐒", cat: "biology",      desc: "Change in heritable traits over generations" },
+  "Genome":     { emoji: "📖", cat: "biology",      desc: "Complete set of genetic instructions" },
+  "Telescope":  { emoji: "🔭", cat: "physics",      desc: "Optical instrument for observing distant objects" },
+  "Microscope": { emoji: "🔬", cat: "physics",      desc: "Instrument to magnify the very small" },
+  "Computer":   { emoji: "💻", cat: "tech",         desc: "Programmable electronic computation device" },
+  "Laser":      { emoji: "📡", cat: "physics",      desc: "Coherent amplified light beam" },
+  "Nuclear Fission": { emoji: "💥", cat: "physics",  desc: "Splitting heavy nuclei to release energy" },
+  "Nuclear Fusion":  { emoji: "☀️", cat: "physics",  desc: "Merging light nuclei — powers the stars" },
+  "Vaccine":    { emoji: "💉", cat: "biology",      desc: "Biological preparation providing immunity" },
+  "Antibiotic": { emoji: "💊", cat: "biology",      desc: "Substance that kills or inhibits bacteria" },
+  "Plastic":    { emoji: "🥤", cat: "chemistry",    desc: "Synthetic polymer — moldable and durable" },
+  "Superconductor": { emoji: "❄️", cat: "physics",  desc: "Zero electrical resistance at low temperature" },
+  "Lightning":  { emoji: "⚡", cat: "physics",      desc: "Massive electrostatic discharge in atmosphere" },
+  "Rain":       { emoji: "🌧️", cat: "earth",        desc: "Liquid water falling from clouds" },
+  "Tectonic Plate": { emoji: "🗺️", cat: "earth",   desc: "Massive slab of Earth's lithosphere" },
+  "Photon":     { emoji: "✴️", cat: "physics",      desc: "Quantum of electromagnetic radiation" },
+  "Star":       { emoji: "⭐", cat: "space",        desc: "Luminous sphere of plasma held by gravity" },
+  "Catalyst":   { emoji: "⏩", cat: "chemistry",    desc: "Speeds up reaction without being consumed" },
+
+  // ---- TIER 5 ----
+  "Black Hole": { emoji: "🕳️", cat: "space",       desc: "Spacetime region where gravity prevents escape" },
+  "Supernova":  { emoji: "💫", cat: "space",        desc: "Explosive death of a massive star" },
+  "Neutron Star": { emoji: "🌑", cat: "space",      desc: "Ultra-dense remnant of a supernova" },
+  "Planet":     { emoji: "🪐", cat: "space",        desc: "Celestial body orbiting a star" },
+  "Galaxy":     { emoji: "🌌", cat: "space",        desc: "Vast system of stars, gas, and dark matter" },
+  "Nebula":     { emoji: "🌫️", cat: "space",        desc: "Interstellar cloud of gas and dust" },
+  "AI":         { emoji: "🤖", cat: "tech",         desc: "Artificial intelligence — machines that think" },
+  "Robot":      { emoji: "🦾", cat: "tech",         desc: "Programmable machine performing tasks" },
+  "Quantum Computer": { emoji: "🔮", cat: "tech",   desc: "Computes using quantum mechanical phenomena" },
+  "CRISPR":     { emoji: "✂️", cat: "biology",      desc: "Gene editing tool from bacterial immune system" },
+  "Cloning":    { emoji: "🐑", cat: "biology",      desc: "Creating genetically identical organisms" },
+  "Penicillin": { emoji: "🍄", cat: "biology",      desc: "First true antibiotic, from Penicillium mold" },
+  "Rocket":     { emoji: "🚀", cat: "tech",         desc: "Vehicle propelled by expelled mass (Newton's 3rd)" },
+  "Solar Panel":{ emoji: "🔆", cat: "tech",         desc: "Converts photons into electricity" },
+  "MRI":        { emoji: "🏥", cat: "tech",         desc: "Magnetic resonance imaging of the body" },
+  "Particle Accelerator": { emoji: "🔄", cat: "tech", desc: "Propels particles to near light speed" },
+  "Dark Matter":{ emoji: "🌑", cat: "space",        desc: "Invisible mass holding galaxies together" },
+  "Gravity Wave":{ emoji: "〰️", cat: "space",      desc: "Ripple in spacetime from massive acceleration" },
+  "Ecosystem":  { emoji: "🌍", cat: "biology",      desc: "Community of organisms and their environment" },
+  "Climate":    { emoji: "🌡️", cat: "earth",        desc: "Long-term pattern of weather in an area" },
+  "Ocean":      { emoji: "🌊", cat: "earth",        desc: "Vast body of saltwater covering the Earth" },
+  "Atmosphere": { emoji: "🌐", cat: "earth",        desc: "Layer of gases surrounding a planet" },
+  "Petroleum":  { emoji: "🛢️", cat: "earth",        desc: "Fossil fuel from ancient organic matter" },
+  "Diamond":    { emoji: "💎", cat: "earth",        desc: "Carbon allotrope — hardest natural material" },
+  "Nanotechnology": { emoji: "🔬", cat: "tech",     desc: "Engineering at the atomic/molecular scale" },
+  "Relativity": { emoji: "🕐", cat: "physics",      desc: "Einstein's theory — spacetime and mass-energy" },
+  "Quantum Mechanics": { emoji: "🎲", cat: "physics", desc: "Physics of the very small — probabilistic" },
+  "Big Bang":   { emoji: "💥", cat: "space",        desc: "The origin of the universe ~13.8 billion years ago" },
+  "Theory of Everything": { emoji: "🌌", cat: "physics", desc: "Hypothetical framework unifying all forces" },
+  "Wormhole":   { emoji: "🕳️", cat: "space",       desc: "Theoretical tunnel through spacetime" },
+  "Dyson Sphere": { emoji: "⭕", cat: "space",      desc: "Megastructure enclosing a star for total energy capture" },
+  "Terraforming": { emoji: "🏗️", cat: "space",     desc: "Engineering a planet to support life" },
+  "Singularity": { emoji: "♾️", cat: "tech",        desc: "Point where AI surpasses human intelligence" },
+};
+
+const RECIPES = [
+  // Tier 1
+  ["Atom", "Atom", "Molecule"],
+  ["Energy", "Atom", "Ion"],
+  ["Energy", "Energy", "Heat"],
+  ["Earth", "Earth", "Pressure"],
+  ["Water", "Energy", "Wave"],
+  ["Water", "Earth", "Mud"],
+  ["Water", "Heat", "Steam"],
+  ["Earth", "Pressure", "Mineral"],
+
+  // Tier 2
+  ["Molecule", "Water", "Cell"],
+  ["Molecule", "Molecule", "Polymer"],
+  ["Mineral", "Heat", "Metal"],
+  ["Mineral", "Pressure", "Crystal"],
+  ["Steam", "Energy", "Gas"],
+  ["Ion", "Energy", "Electricity"],
+  ["Ion", "Water", "Acid"],
+  ["Earth", "Heat", "Magma"],
+  ["Energy", "Wave", "Light"],
+  ["Wave", "Pressure", "Sound"],
+  ["Water", "Wave", "Erosion"],
+  ["Water", "Atom", "Solution"],
+  ["Ion", "Heat", "Plasma"],
+  ["Water", "Mud", "Solution"],
+  ["Heat", "Atom", "Plasma"],
+
+  // Tier 3
+  ["Cell", "Cell", "Bacteria"],
+  ["Cell", "Molecule", "Virus"],
+  ["Cell", "Acid", "DNA"],
+  ["Cell", "Light", "Photosynthesis"],
+  ["Metal", "Electricity", "Magnet"],
+  ["Metal", "Metal", "Alloy"],
+  ["Magma", "Earth", "Volcano"],
+  ["Mud", "Pressure", "Fossil"],
+  ["Earth", "Mud", "Fossil"],
+  ["Crystal", "Electricity", "Semiconductor"],
+  ["Crystal", "Light", "Lens"],
+  ["Cell", "Energy", "Enzyme"],
+  ["Acid", "Mineral", "Salt"],
+  ["Energy", "Atom", "Radiation"],
+  ["Light", "Energy", "Radiation"],
+  ["Pressure", "Earth", "Earthquake"],
+  ["Pressure", "Pressure", "Earthquake"],
+  ["Steam", "Gas", "Cloud"],
+  ["Water", "Gas", "Cloud"],
+  ["Molecule", "Energy", "Catalyst"],
+
+  // Tier 4
+  ["DNA", "DNA", "Genome"],
+  ["Bacteria", "DNA", "Evolution"],
+  ["Cell", "DNA", "Evolution"],
+  ["Lens", "Lens", "Telescope"],
+  ["Lens", "Light", "Microscope"],
+  ["Crystal", "Lens", "Microscope"],
+  ["Semiconductor", "Electricity", "Computer"],
+  ["Light", "Crystal", "Laser"],
+  ["Light", "Lens", "Laser"],
+  ["Atom", "Radiation", "Nuclear Fission"],
+  ["Plasma", "Pressure", "Nuclear Fusion"],
+  ["Atom", "Pressure", "Nuclear Fusion"],
+  ["Virus", "Enzyme", "Vaccine"],
+  ["Bacteria", "Enzyme", "Antibiotic"],
+  ["Polymer", "Heat", "Plastic"],
+  ["Metal", "Crystal", "Superconductor"],
+  ["Electricity", "Cloud", "Lightning"],
+  ["Cloud", "Water", "Rain"],
+  ["Cloud", "Pressure", "Rain"],
+  ["Earthquake", "Earth", "Tectonic Plate"],
+  ["Light", "Atom", "Photon"],
+  ["Light", "Energy", "Photon"],
+  ["Plasma", "Nuclear Fusion", "Star"],
+  ["Heat", "Plasma", "Star"],
+
+  // Tier 5
+  ["Star", "Pressure", "Black Hole"],
+  ["Star", "Star", "Supernova"],
+  ["Star", "Energy", "Supernova"],
+  ["Supernova", "Pressure", "Neutron Star"],
+  ["Star", "Earth", "Planet"],
+  ["Star", "Mineral", "Planet"],
+  ["Star", "Star", "Galaxy"],
+  ["Supernova", "Star", "Galaxy"],
+  ["Gas", "Star", "Nebula"],
+  ["Cloud", "Star", "Nebula"],
+  ["Computer", "Computer", "AI"],
+  ["Computer", "Evolution", "AI"],
+  ["Computer", "Metal", "Robot"],
+  ["Alloy", "Computer", "Robot"],
+  ["Computer", "Photon", "Quantum Computer"],
+  ["Computer", "Atom", "Quantum Computer"],
+  ["DNA", "Enzyme", "CRISPR"],
+  ["Genome", "Laser", "CRISPR"],
+  ["DNA", "DNA", "Cloning"],
+  ["Genome", "Cell", "Cloning"],
+  ["Bacteria", "Mud", "Penicillin"],
+  ["Antibiotic", "Bacteria", "Penicillin"],
+  ["Gas", "Heat", "Rocket"],
+  ["Pressure", "Metal", "Rocket"],
+  ["Photon", "Semiconductor", "Solar Panel"],
+  ["Light", "Semiconductor", "Solar Panel"],
+  ["Magnet", "Computer", "MRI"],
+  ["Magnet", "Wave", "MRI"],
+  ["Electricity", "Magnet", "Particle Accelerator"],
+  ["Energy", "Atom", "Particle Accelerator"],
+  ["Galaxy", "Pressure", "Dark Matter"],
+  ["Supernova", "Wave", "Gravity Wave"],
+  ["Black Hole", "Wave", "Gravity Wave"],
+  ["Cell", "Water", "Ecosystem"],
+  ["Bacteria", "Photosynthesis", "Ecosystem"],
+  ["Rain", "Earth", "Ecosystem"],
+  ["Cloud", "Heat", "Climate"],
+  ["Atmosphere", "Heat", "Climate"],
+  ["Water", "Salt", "Ocean"],
+  ["Wave", "Salt", "Ocean"],
+  ["Gas", "Earth", "Atmosphere"],
+  ["Gas", "Pressure", "Atmosphere"],
+  ["Fossil", "Pressure", "Petroleum"],
+  ["Fossil", "Heat", "Petroleum"],
+  ["Crystal", "Pressure", "Diamond"],
+  ["Crystal", "Heat", "Diamond"],
+  ["Atom", "Microscope", "Nanotechnology"],
+  ["Robot", "Microscope", "Nanotechnology"],
+  ["Light", "Gravity Wave", "Relativity"],
+  ["Energy", "Photon", "Relativity"],
+  ["Photon", "Atom", "Quantum Mechanics"],
+  ["Wave", "Atom", "Quantum Mechanics"],
+  ["Big Bang", "Big Bang", "Theory of Everything"],
+  ["Quantum Mechanics", "Relativity", "Theory of Everything"],
+  ["Singularity", "Relativity", "Wormhole"],
+  ["Black Hole", "Black Hole", "Wormhole"],
+  ["Star", "Rocket", "Dyson Sphere"],
+  ["Star", "Solar Panel", "Dyson Sphere"],
+  ["Planet", "Ecosystem", "Terraforming"],
+  ["Planet", "Rocket", "Terraforming"],
+  ["AI", "AI", "Singularity"],
+  ["AI", "Evolution", "Singularity"],
+  ["Energy", "Pressure", "Big Bang"],
+  ["Nuclear Fusion", "Nuclear Fusion", "Big Bang"],
+];
+
+// ========== GAME STATE ==========
+const BASE_ELEMENTS = ["Atom", "Energy", "Water", "Earth"];
+let discovered = new Set(BASE_ELEMENTS);
+let canvasChips = [];
+let chipIdCounter = 0;
+let dragState = null;
+
+// Load saved state
+function loadState() {
+  try {
+    const saved = localStorage.getItem('scicraft_discovered');
+    if (saved) {
+      const arr = JSON.parse(saved);
+      discovered = new Set([...BASE_ELEMENTS, ...arr.filter(n => ELEMENTS[n])]);
+    }
+  } catch(e) {}
+}
+
+function saveState() {
+  localStorage.setItem('scicraft_discovered', JSON.stringify([...discovered]));
+}
+
+// ========== RECIPE LOOKUP ==========
+const recipeMap = new Map();
+RECIPES.forEach(([a, b, result]) => {
+  recipeMap.set(`${a}|${b}`, result);
+  recipeMap.set(`${b}|${a}`, result);
+});
+
+function combine(a, b) {
+  return recipeMap.get(`${a}|${b}`) || null;
+}
+
+// ========== SIDEBAR ==========
+function renderSidebar(filter = '') {
+  const list = document.getElementById('element-list');
+  const f = filter.toLowerCase();
+  const sorted = [...discovered].sort((a, b) => a.localeCompare(b));
+
+  list.innerHTML = sorted
+    .filter(name => name.toLowerCase().includes(f))
+    .map(name => {
+      const el = ELEMENTS[name];
+      return `<div class="sidebar-item" draggable="true" data-name="${name}"
+                   title="${el.desc}">
+                <span class="emoji">${el.emoji}</span>${name}
+              </div>`;
+    }).join('');
+
+  document.getElementById('count').textContent = discovered.size;
+
+  // Drag from sidebar
+  list.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('mousedown', (e) => sidebarDragStart(e, item.dataset.name));
+    item.addEventListener('touchstart', (e) => sidebarDragStart(e, item.dataset.name), { passive: false });
+  });
+}
+
+// ========== CANVAS CHIPS ==========
+function createChipOnCanvas(name, x, y, animate = false) {
+  const el = ELEMENTS[name];
+  if (!el) return;
+
+  const chip = document.createElement('div');
+  chip.className = 'element-chip' + (animate ? ' result-pop' : '');
+  chip.dataset.chipId = chipIdCounter++;
+  chip.dataset.name = name;
+  chip.style.left = x + 'px';
+  chip.style.top = y + 'px';
+  chip.innerHTML = `<span class="emoji">${el.emoji}</span>${name}<span class="remove">✕</span>`;
+
+  chip.querySelector('.remove').addEventListener('click', (e) => {
+    e.stopPropagation();
+    chip.remove();
+  });
+
+  chip.addEventListener('mousedown', (e) => chipDragStart(e, chip));
+  chip.addEventListener('touchstart', (e) => chipDragStart(e, chip), { passive: false });
+
+  document.getElementById('canvas').appendChild(chip);
+  return chip;
+}
+
+// ========== DRAG & DROP ==========
+function getPos(e) {
+  const t = e.touches ? e.touches[0] : e;
+  return { x: t.clientX, y: t.clientY };
+}
+
+function sidebarDragStart(e, name) {
+  e.preventDefault();
+  const pos = getPos(e);
+  const canvas = document.getElementById('canvas');
+  const rect = canvas.getBoundingClientRect();
+
+  const chip = createChipOnCanvas(name, pos.x - rect.left - 40, pos.y - rect.top - 16);
+  if (!chip) return;
+
+  dragState = {
+    chip,
+    offsetX: 40,
+    offsetY: 16,
+    canvasRect: rect,
+    fromSidebar: true
+  };
+}
+
+function chipDragStart(e, chip) {
+  if (e.target.classList.contains('remove')) return;
+  e.preventDefault();
+  const pos = getPos(e);
+  const canvas = document.getElementById('canvas');
+  const rect = canvas.getBoundingClientRect();
+  const chipRect = chip.getBoundingClientRect();
+
+  dragState = {
+    chip,
+    offsetX: pos.x - chipRect.left,
+    offsetY: pos.y - chipRect.top,
+    canvasRect: rect,
+    fromSidebar: false
+  };
+
+  chip.style.zIndex = 50;
+}
+
+function onMove(e) {
+  if (!dragState) return;
+  e.preventDefault();
+  const pos = getPos(e);
+  const { chip, offsetX, offsetY, canvasRect } = dragState;
+  chip.style.left = (pos.x - canvasRect.left - offsetX) + 'px';
+  chip.style.top = (pos.y - canvasRect.top - offsetY) + 'px';
+}
+
+function onEnd(e) {
+  if (!dragState) return;
+  const { chip } = dragState;
+  chip.style.zIndex = 5;
+
+  // Check overlap with other chips
+  const chipRect = chip.getBoundingClientRect();
+  const allChips = document.querySelectorAll('.element-chip');
+
+  for (const other of allChips) {
+    if (other === chip) continue;
+    const otherRect = other.getBoundingClientRect();
+
+    if (rectsOverlap(chipRect, otherRect)) {
+      attemptMerge(chip, other);
+      break;
+    }
+  }
+
+  dragState = null;
+}
+
+function rectsOverlap(a, b) {
+  return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+}
+
+function attemptMerge(chipA, chipB) {
+  const nameA = chipA.dataset.name;
+  const nameB = chipB.dataset.name;
+  const result = combine(nameA, nameB);
+
+  if (!result) {
+    // No recipe — bounce back
+    showComboText(chipA, "❌ No reaction", false);
+    return;
+  }
+
+  const isNew = !discovered.has(result);
+  discovered.add(result);
+  saveState();
+
+  // Position result between the two
+  const ax = parseFloat(chipA.style.left), ay = parseFloat(chipA.style.top);
+  const bx = parseFloat(chipB.style.left), by = parseFloat(chipB.style.top);
+  const rx = (ax + bx) / 2, ry = (ay + by) / 2;
+
+  // Remove originals
+  chipA.remove();
+  chipB.remove();
+
+  // Create result
+  const resultChip = createChipOnCanvas(result, rx, ry, true);
+
+  const el = ELEMENTS[result];
+  const label = isNew ? `✨ NEW: ${el.emoji} ${result}!` : `${el.emoji} ${result}`;
+  showComboText(resultChip, label, isNew);
+
+  if (isNew) {
+    renderSidebar(document.getElementById('search').value);
+  }
+}
+
+function showComboText(chip, text, isFirst) {
+  const canvas = document.getElementById('canvas');
+  const div = document.createElement('div');
+  div.className = 'combo-text' + (isFirst ? ' first-discovery' : '');
+  div.textContent = text;
+  div.style.left = chip.style.left;
+  div.style.top = (parseFloat(chip.style.top) - 10) + 'px';
+  canvas.appendChild(div);
+  setTimeout(() => div.remove(), 1300);
+}
+
+// ========== CONTROLS ==========
+function clearCanvas() {
+  document.querySelectorAll('.element-chip').forEach(c => c.remove());
+  document.querySelectorAll('.combo-text').forEach(c => c.remove());
+}
+
+function resetGame() {
+  if (!confirm('Reset all progress? You will lose all discovered elements.')) return;
+  discovered = new Set(BASE_ELEMENTS);
+  saveState();
+  clearCanvas();
+  renderSidebar();
+}
+
+// ========== TOOLTIP ==========
+document.addEventListener('mouseover', (e) => {
+  const item = e.target.closest('[data-name]');
+  if (!item) { document.getElementById('tooltip').style.display = 'none'; return; }
+  const name = item.dataset.name;
+  const el = ELEMENTS[name];
+  if (!el) return;
+  const tip = document.getElementById('tooltip');
+  tip.textContent = el.desc;
+  tip.style.display = 'block';
+  const rect = item.getBoundingClientRect();
+  tip.style.left = rect.right + 8 + 'px';
+  tip.style.top = rect.top + 'px';
+});
+
+// ========== INIT ==========
+document.addEventListener('mousemove', onMove);
+document.addEventListener('mouseup', onEnd);
+document.addEventListener('touchmove', onMove, { passive: false });
+document.addEventListener('touchend', onEnd);
+
+document.getElementById('search').addEventListener('input', (e) => {
+  renderSidebar(e.target.value);
+});
+
+// Count total possible
+document.getElementById('total').textContent = Object.keys(ELEMENTS).length;
+
+loadState();
+renderSidebar();
+</script>
+</body>
+</html>
